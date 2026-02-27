@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏账号估值器 - 估价挑战赛</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #FFD700;
+            --primary-dark: #FFA500;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #ffffff;
+            --text-gray: #a0a0a0;
+            --success: #00C853;
+            --warning: #FFC107;
+            --danger: #FF5252;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Home Page */
+        .home-hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+        
+        .home-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .home-subtitle {
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+        
+        .challenge-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .challenge-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .challenge-desc {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .stats-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #1a1a2e;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-light);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Game Selection */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .game-card:hover, .game-card.selected {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .game-card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .game-card-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* PK Page */
+        .pk-header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .pk-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .pk-subtitle {
+            color: var(--text-gray);
+            font-size: 13px;
+        }
+        
+        .reward-table {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .reward-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .reward-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .reward-row:last-child {
+            border-bottom: none;
+        }
+        
+        .reward-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .input-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .input-label {
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .price-input-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .price-prefix {
+            font-size: 24px;
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        
+        .price-input {
+            width: 160px;
+            padding: 15px;
+            font-size: 28px;
+            text-align: center;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-light);
+            outline: none;
+        }
+        
+        .price-suffix {
+            font-size: 24px;
+            color: var(--primary);
+            margin-left: 8px;
+        }
+        
+        .tip-text {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+        
+        /* Result Page */
+        .result-container {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .result-emoji {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .result-prices {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .result-price-item {
+            text-align: center;
+        }
+        
+        .result-price-label {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+        
+        .result-price-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .result-diff {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .result-coupon {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #1a1a2e;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .analysis-text {
+            color: var(--text-gray);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .divider-text {
+            padding: 0 15px;
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+        
+        /* Precision Form */
+        .form-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+        
+        .form-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-option.selected {
+            border-color: var(--primary);
+            background: rgba(255,215,0,0.1);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .phone-note {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-top: 8px;
+        }
+        
+        /* Share Page */
+        .share-container {
+            text-align: center;
+            padding: 30px 0;
+        }
+        
+        .share-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin: 20px 0;
+        }
+        
+        .share-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .share-result {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .share-result-item {
+            text-align: center;
+        }
+        
+        .share-result-label {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+        
+        .share-result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .share-coupon {
+            background: rgba(255,215,0,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .qr-section {
+            margin: 30px 0;
+        }
+        
+        .qr-image {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            border-radius: 10px;
+        }
+        
+        .qr-tip {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        .share-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .share-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .share-btn-save {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #1a1a2e;
+        }
+        
+        .share-btn-share {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-light);
+        }
+        
+        /* Precision Result */
+        .precision-result-card {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .precision-price {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .precision-note {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-list {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .contact-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .contact-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+            animation: toastIn 0.3s ease;
+        }
+        
+        .toast.show {
+            display: block;
+        }
+        
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* Hidden canvas for share */
+        #shareCanvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page 1: Home -->
+    <div id="page-home" class="page active">
+        <div class="home-hero">
+            <div class="game-icon" style="background: linear-gradient(135deg, #FFD700, #FF6B6B);">🎮</div>
+            <h1 class="home-title">游戏账号估值器</h1>
+            <p class="home-subtitle">专业估价 · 快速成交 · 安全无忧</p>
+            
+            <div class="challenge-card">
+                <h2 class="challenge-title">💰 估价挑战赛</h2>
+                <p class="challenge-desc">猜中AI估价，领取无门槛券！<br>猜得越准，奖励越多</p>
+                <span class="stats-badge">已有 <span id="total-participants">12,345</span> 人参与</span>
+            </div>
+            
+            <button class="btn btn-primary" onclick="goToGameSelect()">立即挑战</button>
+            <button class="btn btn-secondary" onclick="goToPrecisionForm()">精准估价</button>
+        </div>
+    </div>
+    
+    <!-- Page 2: Game Selection -->
+    <div id="page-game" class="page">
+        <div class="pk-header">
+            <h2 class="pk-title">选择游戏</h2>
+            <p class="pk-subtitle">开始估价挑战</p>
+        </div>
+        
+        <div class="game-grid">
+            <div class="game-card" onclick="selectGame('wangzhe')">
+                <div class="game-card-icon" style="background: linear-gradient(135deg, #FFD700, #FF8C00);">👑</div>
+                <div class="game-card-name">王者荣耀</div>
+            </div>
+            <div class="game-card" onclick="selectGame('heping')">
+                <div class="game-card-icon" style="background: linear-gradient(13500);">🎮</div>
+                <div class="game-card-name">和平精英</div>
+            </div>
+            <div class="game-card" onclick="selectGame('sanjiao')">
+                <div class="game-card-icon" style="background: linear-gradient(135deg, #4a5568, #2d3748);">🦅</div>
+                <div class="game-card-name">三角洲行动</div>
+            </div>
+            <div class="game-card" onclick="selectGame('heping')">
+                <div class="game-card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                <div class="game-card-name">更多游戏</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page 3: PK Game -->
+    <div id="page-pk" class="page">
+        <div class="pk-header">
+            <h2 class="pk-title">💰 估价挑战赛</h2>
+            <p class="pk-subtitle">猜中AI估价，领取无门槛券</p>
+        </div>
+        
+        <div class="reward-table">
+            <div class="reward-title">🏆 奖励规则</div>
+            <div class="reward-row">
+                <span>差异 ≤ 5%</span>
+                <span class="reward-badge" style="background: #FFD700; color: #1a1a2e;">50元券</span>
+            </div>
+            <div class="reward-row">
+                <span>差异 ≤ 10%</span>
+                <span class="reward-badge" style="background: #FFA726; color: #1a1a2e;">30元券</span>
+            </div>
+            <div class="reward-row">
+                <span>差异 ≤ 20%</span>
+                <span class="reward-badge" style="background: #FFB74D; color: #1a1a2e;">20元券</span>
+            </div>
+            <div class="reward-row">
+                <span>差异 ≤ 30%</span>
+                <span class="reward-badge" style="background: #FFCC80; color: #1a1a2e;">10元券</span>
+            </div>
+            <div class="reward-row">
+                <span>差异 > 30%</span>
+                <span class="reward-badge" style="background: #FFE0B2; color: #1a1a2e;">5元券</span>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <p class="input-label">你觉得这个账号值多少？</p>
+            <div class="price-input-wrapper">
+                <span class="price-prefix">¥</span>
+                <input type="number" class="price-input" id="user-price" placeholder="0" />
+                <span class="price-suffix">元</span>
+            </div>
+            <p class="tip-text">提示：实际价值在 ¥<span id="price-range">500 - 2000</span> 之间</p>
+        </div>
+        
+        <button class="btn btn-primary" onclick="submitPK()">提交估价</button>
+        
+        <p style="text-align: center; color: var(--text-gray); font-size: 12px; margin-top: 20px;">
+            已有 <span id="pk-participants">8,888</span> 人参与
+        </p>
+    </div>
+    
+    <!-- Page 4: Result -->
+    <div id="page-result" class="page">
+        <div class="result-container">
+            <div id="result-emoji" class="result-emoji">🎉</div>
+            <h2 id="result-title" class="result-title">太准了！</h2>
+            
+            <div class="result-card">
+                <div class="result-prices">
+                    <div class="result-price-item">
+                        <div class="result-price-label">你的估价</div>
+                        <div id="result-user" class="result-price-value">¥1,200</div>
+                    </div>
+                    <div class="result-price-item">
+                        <div class="result-price-label">AI估价</div>
+                        <div id="result-ai" class="result-price-value">¥1,188</div>
+                    </div>
+                </div>
+                
+                <div id="result-diff-badge" class="result-diff">差异：1.0%</div>
+                
+                <div id="result-coupon" class="result-coupon">🎁 50元无门槛券</div>
+            </div>
+            
+            <p id="analysis-text" class="analysis-text">你的估价能力超越了99%的玩家！</p>
+            
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">或者</span>
+                <div class="divider-line"></div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="goToPrecisionForm()">🔍 获取更精准估价</button>
+            <button class="btn btn-primary" onclick="goToShare()">🎨 生成分享海报</button>
+        </div>
+    </div>
+    
+    <!-- Page 5: Precision Form -->
+    <div id="page-precision" class="page">
+        <div class="pk-header">
+            <h2 class="pk-title">🔍 获取精准估价</h2>
+            <p class="pk-subtitle">填写详细信息，获取准确报价</p>
+        </div>
+        
+        <form id="precision-form">
+            <div id="game-fields">
+                <!-- Dynamic game fields will be inserted here -->
+            </div>
+            
+            <div class="form-section">
+                <div class="form-label">📱 手机号（必填）</div>
+                <input type="tel" class="form-input" id="phone" placeholder="请输入手机号" required />
+                <p class="phone-note">用于接收估价结果和优惠券</p>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="submitPrecision()">提交获取精准报价</button>
+        </form>
+    </div>
+    
+    <!-- Page 6: Precision Result -->
+    <div id="page-precision-result" class="page">
+        <div class="result-container">
+            <div class="result-emoji">🎉</div>
+            <h2 class="result-title">精准估价已生成</h2>
+            
+            <div class="precision-result-card">
+                <p>你的账号预估价值</p>
+                <div id="precision-price" class="precision-price">¥1,000 - 1,200</div>
+                <p id="precision-sent" class="precision-note">估价已发送至 1XXXXXXXXXX</p>
+                
+                <div class="detail-list" id="precision-details">
+                    <!-- Details will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="contact-card">
+                <p class="contact-title">📱 客服将联系你</p>
+                <p style="font-size: 12px; opacity: 0.8;">进行验号和交易对接</p>
+            </div>
+            
+            <button class="btn btn-primary" onclick="goToHome()">返回首页</button>
+        </div>
+    </div>
+    
+    <!-- Page 7: Share -->
+    <div id="page-share" class="page">
+        <div class="share-container">
+            <div class="share-card">
+                <h3 class="share-title">🏆 估价挑战赛</h3>
+                
+                <div class="share-result">
+                    <div class="share-result-item">
+                        <div class="share-result-label">我的估价</div>
+                        <div id="share-user" class="share-result-value">¥1,200</div>
+                    </div>
+                    <div class="share-result-item">
+                        <div class="share-result-label">AI估价</div>
+                        <div id="share-ai" class="share-result-value">¥1,188</div>
+                    </div>
+                </div>
+                
+                <div id="share-coupon" class="share-coupon">
+                    🎁 差异1.0% 获得 50元券
+                </div>
+                
+                <div class="qr-section">
+                    <img id="qr-image" class="qr-image" src="" alt="客服二维码" />
+                    <p class="qr-tip">长按识别二维码 · 一起挑战领券</p>
+                </div>
+            </div>
+            
+            <div class="share-btns">
+                <button class="share-btn share-btn-save" onclick="saveShareImage()">💾 保存图片</button>
+                <button class="share-btn share-btn-share" onclick="shareToFriend()">📤 分享给好友</button>
+            </div>
+            
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="goToHome()">返回首页</button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast">保存成功</div>
+    
+    <!-- Hidden canvas for generating share image -->
+    <canvas id="shareCanvas" width="375" height="600"></canvas>
+
+    <script>
+        // Global state
+        let currentGame = '';
+        let currentSample = {};
+        let pkResult = {};
+        let precisionResult = {};
+        let participants = 12345;
+        
+        // Game field templates
+        const gameFields = {
+            wangzhe: `
+                <div class="form-section">
+                    <div class="form-label">游戏区服</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'zone', 'Q区')">Q区</div>
+                        <div class="form-option" onclick="selectOption(this, 'zone', 'V区')">V区</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">贵族等级</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'vip', 'V0-V9')">V0-V9</div>
+                        <div class="form-option" onclick="selectOption(this, 'vip', 'V10')">V10</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">皮肤数量</div>
+                    <input type="number" class="form-input" id="skin-count" placeholder="请输入皮肤数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">珍品传说数量</div>
+                    <input type="number" class="form-input" id="legend-count" placeholder="请输入传说数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">珍品无双/典藏数量</div>
+                    <input type="number" class="form-input" id="epic-count" placeholder="请输入数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">是否为女生号</div>
+                    <div class="form-options">
+                        <div class="form-option" onclick="selectOption(this, 'girl', '是')">是</div>
+                        <div class="form-option selected" onclick="selectOption(this, 'girl', '否')">否</div>
+                    </div>
+                </div>
+            `,
+            heping: `
+                <div class="form-section">
+                    <div class="form-label">账号是否有二次</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'second', '有')">有</div>
+                        <div class="form-option" onclick="selectOption(this, 'second', '无')">无</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">粉色套装数量</div>
+                    <input type="number" class="form-input" id="pink-count" placeholder="请输入数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">特效枪数量</div>
+                    <input type="number" class="form-input" id="gun-count" placeholder="请输入数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">载具类型</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'car', '普通')">普通</div>
+                        <div class="form-option" onclick="selectOption(this, 'car', '红蹦蹦')">红蹦蹦</div>
+                        <div class="form-option" onclick="selectOption(this, 'car', '五级车')">五级车</div>
+                        <div class="form-option" onclick="selectOption(this, 'car', '满级车')">满级车</div>
+                    </div>
+                </div>
+            `,
+            sanjiao: `
+                <div class="form-section">
+                    <div class="form-label">烽火等级</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'level', '40+')">40级以上</div>
+                        <div class="form-option" onclick="selectOption(this, 'level', '40-')">40级以下</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">资产（万货币）</div>
+                    <input type="number" class="form-input" id="asset" placeholder="请输入资产数量" />
+                </div>
+                <div class="form-section">
+                    <div class="form-label">是否有枪皮</div>
+                    <div class="form-options">
+                        <div class="form-option" onclick="selectOption(this, 'gunskin', '有')">有</div>
+                        <div class="form-option selected" onclick="selectOption(this, 'gunskin', '无')">无</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">是否有英雄皮肤</div>
+                    <div class="form-options" id="hero-skins">
+                        <div class="form-option" onclick="toggleHeroSkin(this, '水墨云图')">水墨云图</div>
+                        <div class="form-option" onclick="toggleHeroSkin(this, '蚀金玫瑰')">蚀金玫瑰</div>
+                        <div class="form-option" onclick="toggleHeroSkin(this, '飞虎威龙')">飞虎威龙</div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form-label">是否有封号记录</div>
+                    <div class="form-options">
+                        <div class="form-option selected" onclick="selectOption(this, 'ban', '无')">无</div>
+                        <div class="form-option" onclick="selectOption(this, 'ban', '有')">有</div>
+                    </div>
+                </div>
+            `
+        };
+        
+        // Sample accounts for PK game
+        const samples = {
+            wangzhe: [
+                { price: 888, desc: 'V8 | 188皮肤 | 18传说' },
+                { price: 1588, desc: 'V10 | 280皮肤 | 28传说 | 2无双' },
+                { price: 688, desc: 'V6 | 120皮肤 | 8传说' },
+                { price: 2888, desc: 'V10满 | 400+皮肤 | 50传说 | 5典藏' },
+                { price: 1288, desc: 'V9 | 200皮肤 | 15传说 | 1无双' },
+                { price: 3888, desc: 'V10满 | 500皮肤 | 80传说 | 8典藏' },
+                { price: 588, desc: 'V5 | 80皮肤 | 5传说' },
+                { price: 2188, desc: 'V10 | 350皮肤 | 35传说 | 3无双' }
+            ],
+            heping: [
+                { price: 688, desc: '基础号 | 1粉色 | 2特效枪' },
+                { price: 1588, desc: '无二次 | 3粉色 | 5特效枪 | 红蹦蹦' },
+                { price: 888, desc: '1000内 | 2粉色 | 3特效枪' },
+                { price: 2888, desc: '满级车 | 5粉色 | 10特效枪' },
+                { price: 488, desc: '基础号 | 1粉色 | 1特效枪' },
+                { price: 2188, desc: '无二次8折 | 4粉色 | 6特效枪 | 五级车' }
+            ],
+            sanjiao: [
+                { price: 588, desc: '40级 | 100m资产 | 无枪皮' },
+                { price: 1288, desc: '45级 | 300m资产 | 1枪皮' },
+                { price: 888, desc: '42级 | 200m资产 | 水墨云图' },
+                { price: 1888, desc: '50级 | 500m资产 | 1枪皮 | 蚀金玫瑰' },
+                { price: 688, desc: '38级 | 150m资产 | 无特殊' }
+            ]
+        };
+        
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+        
+        function goToGameSelect() {
+            showPage('page-game');
+        }
+        
+        function goToHome() {
+            participants++;
+            document.getElementById('total-participants').textContent = formatNumber(participants);
+            document.getElementById('pk-participants').textContent = formatNumber(participants - 3000);
+            showPage('page-home');
+        }
+        
+        function goToPrecisionForm() {
+            if (!currentGame) {
+                showToast('请先选择游戏');
+                return;
+            }
+            
+            // Set game fields
+            document.getElementById('game-fields').innerHTML = gameFields[currentGame] || '';
+            
+            // Set game name in header
+            const gameNames = { wangzhe: '王者荣耀', heping: '和平精英', sanjiao: '三角洲行动' };
+            document.querySelector('#page-precision .pk-subtitle').textContent = gameNames[currentGame] || '';
+            
+            showPage('page-precision');
+        }
+        
+        function goToShare() {
+            showPage('page-share');
+        }
+        
+        // Game selection
+        function selectGame(game) {
+            currentGame = game;
+            
+            // Random sample
+            const gameSamples = samples[game] || samples.wangzhe;
+            currentSample = gameSamples[Math.floor(Math.random() * gameSamples.length)];
+            
+            // Update price range
+            const minPrice = Math.floor(currentSample.price * 0.5);
+            const maxPrice = Math.floor(currentSample.price * 1.5);
+            document.getElementById('price-range').textContent = `${minPrice} - ${maxPrice}`;
+            
+            showPage('page-pk');
+        }
+        
+        // Option selection in forms
+        function selectOption(el, field, value) {
+            const parent = el.parentElement;
+            parent.querySelectorAll('.form-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        
+        function toggleHeroSkin(el, skin) {
+            el.classList.toggle('selected');
+        }
+        
+        // Submit PK
+        function submitPK() {
+            const userPrice = parseFloat(document.getElementById('user-price').value);
+            
+            if (!userPrice || userPrice <= 0) {
+                showToast('请输入有效价格');
+                return;
+            }
+            
+            const aiPrice = currentSample.price;
+            const diff = Math.abs(userPrice - aiPrice) / aiPrice * 100;
+            
+            // Calculate reward
+            let reward, emoji, title, analysis, diffClass, diffText;
+            if (diff <= 5) {
+                reward = '50元无门槛券';
+                emoji = '🎉';
+                title = '太准了！';
+                analysis = '你的估价能力超越了 99% 的玩家！';
+                diffClass = '#00C853';
+                diffText = `差异：${diff.toFixed(1)}%`;
+            } else if (diff <= 10) {
+                reward = '30元无门槛券';
+                emoji = '👍';
+                title = '很准！';
+                analysis = '你的估价能力超越了 95% 的玩家！';
+                diffClass = '#FFA726';
+                diffText = `差异：${diff.toFixed(1)}%`;
+            } else if (diff <= 20) {
+                reward = '20元无门槛券';
+                emoji = '😊';
+                title = '不错！';
+                analysis = '你的估价能力超越了 80% 的玩家！';
+                diffClass = '#FFB74D';
+                diffText = `差异：${diff.toFixed(1)}%`;
+            } else if (diff <= 30) {
+                reward = '10元无门槛券';
+                emoji = '💪';
+                title = '还行！';
+                analysis = '你的估价能力超越了 60% 的玩家！';
+                diffClass = '#FFCC80';
+                diffText = `差异：${diff.toFixed(1)}%`;
+            } else {
+                reward = '5元无门槛券';
+                emoji = '😅';
+                title = '差一点！';
+                analysis = `实际价格是 ¥${aiPrice}，再试一次看看！`;
+                diffClass = '#FF5252';
+                diffText = `差异：${diff.toFixed(1)}%`;
+            }
+            
+            // Store result
+            pkResult = { userPrice, aiPrice, diff, reward, emoji, title, analysis, diffClass, diffText };
+            
+            // Update result page
+            document.getElementById('result-emoji').textContent = emoji;
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-user').textContent = `¥${formatNumber(userPrice)}`;
+            document.getElementById('result-ai').textContent = `¥${formatNumber(aiPrice)}`;
+            document.getElementById('result-diff-badge').textContent = diffText;
+            document.getElementById('result-diff-badge').style.background = diffClass;
+            document.getElementById('result-diff-badge').style.color = '#fff';
+            document.getElementById('result-coupon').textContent = `🎁 ${reward}`;
+            document.getElementById('analysis-text').textContent = analysis;
+            
+            // Update share page
+            document.getElementById('share-user').textContent = `¥${formatNumber(userPrice)}`;
+            document.getElementById('share-ai').textContent = `¥${formatNumber(aiPrice)}`;
+            document.getElementById('share-coupon').textContent = `🎁 差异${diff.toFixed(1)}% 获得 ${reward}`;
+            
+            // Set QR code
+            document.getElementById('qr-image').src = 'images/qrcode.jpg';
+            
+            showPage('page-result');
+        }
+        
+        // Submit precision form
+        function submitPrecision() {
+            const phone = document.getElementById('phone').value;
+            
+            if (!phone || phone.length < 11) {
+                showToast('请输入正确的手机号');
+                return;
+            }
+            
+            // Calculate precision price based on form data
+            let basePrice = 500;
+            let details = [];
+            
+            // Get form values based on game
+            if (currentGame === 'wangzhe') {
+                const skinCount = parseInt(document.getElementById('skin-count')?.value) || 0;
+                const legendCount = parseInt(document.getElementById('legend-count')?.value) || 0;
+                const epicCount = parseInt(document.getElementById('epic-count')?.value) || 0;
+                
+                basePrice = 200 + skinCount * 3 + legendCount * 20 + epicCount * 50;
+                details = [
+                    { name: '基础价值', value: '¥200' },
+                    { name: '皮肤加成', value: `¥${skinCount * 3}` },
+                    { name: '传说加成', value: `¥${legendCount * 20}` },
+                    { name: '无双典藏', value: `¥${epicCount * 50}` }
+                ];
+            } else if (currentGame === 'heping') {
+                const pinkCount = parseInt(document.getElementById('pink-count')?.value) || 0;
+                const gunCount = parseInt(document.getElementById('gun-count')?.value) || 0;
+                
+                basePrice = 300 + pinkCount * 30 + gunCount * 50;
+                details = [
+                    { name: '基础价值', value: '¥300' },
+                    { name: '粉色套装', value: `¥${pinkCount * 30}` },
+                    { name: '特效枪', value: `¥${gunCount * 50}` }
+                ];
+            } else if (currentGame === 'sanjiao') {
+                const asset = parseInt(document.getElementById('asset')?.value) || 0;
+                const gunskin = document.querySelector('#page-precision input[id="gun-count"]')?.parentElement?.querySelector('.selected')?.textContent === '有';
+                
+                basePrice = asset * 2 + 200;
+                details = [
+                    { name: '资产价值', value: `¥${asset * 2}` },
+                    { name: '基础价值', value: '¥200' }
+                ];
+            }
+            
+            const minPrice = Math.floor(basePrice * 0.9);
+            const maxPrice = Math.floor(basePrice * 1.1);
+            
+            precisionResult = {
+                minPrice,
+                maxPrice,
+                phone,
+                details,
+                formattedPhone: phone.substring(0, 3) + '********'
+            };
+            
+            // Update precision result page
+            document.getElementById('precision-price').textContent = `¥${formatNumber(minPrice)} - ${formatNumber(maxPrice)}`;
+            document.getElementById('precision-sent').textContent = `估价已发送至 ${precisionResult.formattedPhone}`;
+            
+            // Build details HTML
+            const detailsHtml = precisionResult.details.map(d => `
+                <div class="detail-item">
+                    <span>${d.name}</span>
+                    <span>${d.value}</span>
+                </div>
+            `).join('');
+            document.getElementById('precision-details').innerHTML = detailsHtml;
+            
+            showPage('page-precision-result');
+        }
+        
+        // Share functions
+        function saveShareImage() {
+            const canvas = document.getElementById('shareCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(1, '#2d2d44');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 375, 600);
+            
+            // Title
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏆 估价挑战赛', 187, 50);
+            
+            // Result
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '16px sans-serif';
+            ctx.fillText(`我的估价：¥${formatNumber(pkResult.userPrice)}`, 187, 100);
+            ctx.fillText(`AI估价：¥${formatNumber(pkResult.aiPrice)}`, 187, 130);
+            
+            // Diff and reward
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText(`差异${pkResult.diff.toFixed(1)}% 获得 ${pkResult.reward}`, 187, 180);
+            
+            // Divider
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(50, 210);
+            ctx.lineTo(325, 210);
+            ctx.stroke();
+            
+            // QR code placeholder
+            const qrImg = new Image();
+            qrImg.onload = function() {
+                ctx.drawImage(qrImg, 112, 240, 150, 150);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('长按识别二维码', 187, 420);
+                ctx.fillText('一起挑战领券！', 187, 445);
+                
+                ctx.fillStyle = '#a0a0a0';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('估价仅供参考，以客服验号为准', 187, 480);
+                
+                // Bottom decoration
+                ctx.fillStyle = 'rgba(255,215,0,0.1)';
+                ctx.fillRect(0, 520, 375, 80);
+                
+                // Save
+                const link = document.createElement('a');
+                link.download = '估价挑战结果.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('图片已保存');
+            };
+            qrImg.onerror = function() {
+                // Draw placeholder if QR fails
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(112, 240, 150, 150);
+                ctx.fillStyle = '#1a1a2e';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('客服二维码', 187, 315);
+                
+                const link = document.createElement('a');
+                link.download = '估价挑战结果.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('图片已保存');
+            };
+            qrImg.src = 'images/qrcode.jpg';
+        }
+        
+        function shareToFriend() {
+            // Native share API if available
+            if (navigator.share) {
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], '估价挑战结果.png', { type: 'image/png' });
+                    navigator.share({
+                        title: '估价挑战赛',
+                        text: `我估价获得了 ${pkResult.reward}，快来挑战！`,
+                        files: [file]
+                    });
+                });
+            } else {
+                showToast('请点击"保存图片"后分享');
+            }
+        }
+        
+        // Utility functions
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial participants
+            participants = 12345 + Math.floor(Math.random() * 1000);
+            document.getElementById('total-participants').textContent = formatNumber(participants);
+            document.getElementById('pk-participants').textContent = formatNumber(participants - 3000);
+        });
+    </script>
+</body>
+</html>
