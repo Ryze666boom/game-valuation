@@ -988,19 +988,8 @@
         }
         
         function goToPrecisionForm() {
-            if (!currentGame) {
-                showToast('请先选择游戏');
-                return;
-            }
-            
-            // Set game fields
-            document.getElementById('game-fields').innerHTML = gameFields[currentGame] || '';
-            
-            // Set game name in header
-            const gameNames = { wangzhe: '王者荣耀', heping: '和平精英', sanjiao: '三角洲行动' };
-            document.querySelector('#page-precision .pk-subtitle').textContent = gameNames[currentGame] || '';
-            
-            showPage('page-precision');
+            // First go to game selection
+            showPage('page-game');
         }
         
         function goToShare() {
