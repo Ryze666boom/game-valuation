@@ -1167,13 +1167,11 @@
                 minPrice,
                 maxPrice,
                 phone,
-                details,
-                formattedPhone: phone.substring(0, 3) + '********'
+                details
             };
             
             // Update precision result page
             document.getElementById('precision-price').textContent = `¥${formatNumber(minPrice)} - ${formatNumber(maxPrice)}`;
-            document.getElementById('precision-sent').textContent = `估价已发送至 ${precisionResult.formattedPhone}`;
             
             // Build details HTML
             const detailsHtml = precisionResult.details.map(d => `
