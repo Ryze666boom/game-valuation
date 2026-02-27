@@ -1011,6 +1011,9 @@
             const maxPrice = Math.floor(currentSample.price * 1.5);
             document.getElementById('price-range').textContent = `${minPrice} - ${maxPrice}`;
             
+            // Display account info
+            document.getElementById('account-desc').textContent = currentSample.desc;
+            
             showPage('page-pk');
         }
         
